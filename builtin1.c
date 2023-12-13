@@ -1,114 +1,91 @@
 #include "shell.h"
 
 /**
- * display_history - Displays the command history list with line numbers.
+ * display_environment - Prints the current environment.
  * @info: Structure containing potential arguments.
  *
  * Return: Always 0
  */
-int _dishistory(info_t *info)
+int _environment(info_t *info)
 {
-	print_list(info->history);
+	print_list_str(info->env);
 	return (0);
 }
 
 /**
- * remove_alias - Removes an alias from the list.
- * @info: Parameter struct.
- * @str: The alias string.
+ * find_environment_variable - Gets the value of an environment variable.
+ * @info: Structure containing potential arguments.
+ * @name: Environment variable name.
  *
- * Return: Always 0 on success, 1 on error
+ * Return: The value of the environment variable.
  */
-int remove_alias(info_t *info, char *str)
+char _environmentvar(info_t *info, const char *name)
 {
-	char *p, c;
-	int ret;
-	p = _strchr(str, '=');
-	if (!p)
-		return (1);
-	c = *p;
-	*p = 0;
-	ret = delete_node_at_index(&(info->alias),
-		get_node_index(info->alias, node_starts_with(info->alias, str, -1)));
-	*p = c;
-	return (ret);
-}
-
-/**
- * add_alias - Adds an alias to the list.
- * @info: Parameter struct.
- * @str: The alias string.
- *
- * Return: Always 0 on success, 1 on error
- */
-int add_alias(info_t *info, char *str)
-{
+	list_t *node = info->env;
 	char *p;
-
-	p = _strchr(str, '=');
-	if (!p)
-		return (1);
-	if (!*++p)
-		return (remove_alias(info, str));
-
-	remove_alias(info, str);
-	return (add_node_end(&(info->alias), str, 0) == NULL);
-}
-
-/**
- * print_single_alias - Prints a single alias.
- * @node: The alias node.
- *
- * Return: Always 0 on success, 1 on error
- */
-int print_single_alias(list_t *node)
-{
-	char *p = NULL, *a = NULL;
-
-	if (node)
+	while (node)
 	{
-		p = _strchr(node->str, '=');
-		for (a = node->str; a <= p; a++)
-			_putchar(*a);
-		_putchar('\'');
-		_puts(p + 1);
-		_puts("'\n");
-		return (0);
+		p = starts_with(node->str, name);
+		if (p && *p)
+			return (p);
+		node = node->next;
 	}
-	return (1);
+	return (NULL);
 }
 
 /**
- * manage_alias - Manages alias functionality.
+ * set_environment_variable - Initializes a new environment variable or modifies an existing one.
  * @info: Structure containing potential arguments.
  *
  * Return: Always 0
  */
-int _manage_alias(info_t *info)
+int _set_environment(info_t *info)
 {
-	int i = 0;
-	char *p = NULL;
-	list_t *node = NULL;
+	if (info->argc != 3)
+	{
+		_eputs("Incorrect arguements\n");
+		return (1);
+	}
+	if (_setenv(info, info->argv[1], info->argv[2]))
+		return (0);
+	return (1);
+}
+
+/**
+ * unset_environment_variable - Removes an environment variable.
+ * @info: Structure containing potential arguments.
+ *
+ * Return: Always 0
+ */
+int _unset_environment(info_t *info)
+{
+	int i;
 
 	if (info->argc == 1)
 	{
-		node = info->alias;
-		while (node)
-		{
-			print_single_alias(node);
-			node = node->next;
-		}
-		return (0);
+		_eputs("few arguements.\n");
+		return (1);
 	}
-	for (i = 1; info->argv[i]; i++)
-	{
-		p = _strchr(info->argv[i], '=');
-		if (p)
-			add_alias(info, info->argv[i]);
-		else
-			print_single_alias(node_starts_with(info->alias, info->argv[i], '='));
-	}
+	for (i = 1; i <= info->argc; i++)
+		_unsetenv(info, info->argv[i]);
 
+	return (0);
+}
+
+/**
+ * initialize_environment_list - Populates the environment linked list.
+ * @info: Structure containing potential arguments.
+ *
+ * Return: Always 0
+ */
+int initialize_environment_list(info_t *info)
+{
+	list_t *node = NULL;
+	size_t i;
+
+	for (i = 0; environ[i]; i++)
+		add_node_end(&node, environ[i], 0);
+	info->env = node;
 	return (0);
 }
 
