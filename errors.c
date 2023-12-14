@@ -1,12 +1,12 @@
 #include "shell.h"
 
 /**
- * print_error_string - Prints an error message to stderr.
- * @str: The string to be printed.
+ *_eputs - prints an input string
+ * @str: the string to be printed
  *
- * Return: Nothing.
+ * Return: Nothing
  */
-void _error_string(char *str)
+void _eputs(char *str)
 {
 	int i = 0;
 
@@ -14,19 +14,19 @@ void _error_string(char *str)
 		return;
 	while (str[i] != '\0')
 	{
-		write_error_char(str[i]);
+		_eputchar(str[i]);
 		i++;
 	}
 }
 
 /**
- * write_error_char - Writes the character c to stderr.
- * @c: The character to print.
+ * _eputchar - writes the character c to stderr
+ * @c: The character to print
  *
  * Return: On success 1.
  * On error, -1 is returned, and errno is set appropriately.
  */
-int _error_char(char c)
+int _eputchar(char c)
 {
 	static int i;
 	static char buf[WRITE_BUF_SIZE];
@@ -42,14 +42,14 @@ int _error_char(char c)
 }
 
 /**
- * write_to_file_descriptor - Writes the character c to the given file descriptor.
- * @c: The character to print.
- * @fd: The file descriptor to write to.
+ * _putfd - writes the character c to given fd
+ * @c: The character to print
+ * @fd: The filedescriptor to write to
  *
  * Return: On success 1.
  * On error, -1 is returned, and errno is set appropriately.
  */
-int _to_file_descriptor(char c, int fd)
+int _putfd(char c, int fd)
 {
 	static int i;
 	static char buf[WRITE_BUF_SIZE];
@@ -65,13 +65,13 @@ int _to_file_descriptor(char c, int fd)
 }
 
 /**
- * print_to_file_descriptor - Prints an input string to the specified file descriptor.
- * @str: The string to be printed.
- * @fd: The file descriptor to write to.
+ *_putsfd - prints an input string
+ * @str: the string to be printed
+ * @fd: the filedescriptor to write to
  *
- * Return: The number of characters put.
+ * Return: the number of chars put
  */
-int _print_to_file_descriptor(char *str, int fd)
+int _putsfd(char *str, int fd)
 {
 	int i = 0;
 
@@ -79,7 +79,7 @@ int _print_to_file_descriptor(char *str, int fd)
 		return (0);
 	while (*str)
 	{
-		i += _to_file_descriptor(*str++, fd);
+		i += _putfd(*str++, fd);
 	}
 	return (i);
 }
