@@ -35,7 +35,7 @@ int _custom_unsetenv(t *shell_info, char *variable)
 
 	while (node)
 	{
-		p = str_with(node->str, variable);
+		p = string_with(node->str, variable);
 		if (p && *p == '=')
 		{
 			shell_info->env_changed = delete_node_at_index(&(shell_info->env), i);
@@ -70,13 +70,13 @@ int _setenv(t *shell_info, char *variable, char *value)
 	buffer = malloc(_strlen(variable) + _strlen(value) + 2);
 	if (!buffer)
 		return (1);
-	_strcpy(buffer, variable);
-	_strcat(buffer, "=");
-	_strcat(buffer, value);
+	_stringcopy(buffer, variable);
+	_stringcat(buffer, "=");
+	_stringcat(buffer, value);
 	node = shell_info->env;
 	while (node)
 	{
-		p = str_with(node->str, variable);
+		p = string_with(node->str, variable);
 		if (p && *p == '=')
 		{
 			free(node->str);
