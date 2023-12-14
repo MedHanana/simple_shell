@@ -1,45 +1,39 @@
 #include "shell.h"
 
 /**
- * main - entry point
- * @ac: arg count
- * @av: arg vector
+ * main - the main function
  *
- * Return: 0 on success, 1 on error
+ * @ac: the int
+ * @argv : the name of the shell
+ *
+ * Return: 1 upon succes, 0 if no
  */
-int main(int ac, char **av)
+
+int main(int ac, char **argv)
 {
-	info_t info[] = { INFO_INIT };
-	int fd = 2;
+	char *line = NULL;
+	char **cmd = NULL;
+	int status = 0, i = 0;
 
-	asm ("mov %1, %0\n\t"
-		"add $3, %0"
-		: "=r" (fd)
-		: "r" (fd));
+	(void)ac;
 
-	if (ac == 2)
+	while (1)
 	{
-		fd = open(av[1], O_RDONLY);
-		if (fd == -1)
+		line = read_line();
+		if (line == NULL)
 		{
-			if (errno == EACCES)
-				exit(126);
-			if (errno == ENOENT)
-			{
-				_eputs(av[0]);
-				_eputs(": 0: Can't open ");
-				_eputs(av[1]);
-				_eputchar('\n');
-				_eputchar(BUF_FLUSH);
-				exit(127);
-			}
-			return (EXIT_FAILURE);
+			if (isatty(STDIN_FILENO))
+				write(STDOUT_FILENO, "\n", 1);
+			return (0);
 		}
-		info->readfd = fd;
+		i++;
+		cmd = tokenise(line);
+		if (!cmd)
+			continue;
+		if (is_builtin(cmd[0]))
+			handle_builtin(cmd, argv, &status, i);
+		else
+			status = _execute(cmd, argv, i);
 	}
-	populate_env_list(info);
-	read_history(info);
-	hsh(info, av);
-	return (EXIT_SUCCESS);
+	return (WEXITSTATUS(status));
 }
-
